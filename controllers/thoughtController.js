@@ -4,16 +4,17 @@ module.exports = {
 
     async getThoughts(req,res){
         try{
-            const thoughts = await Thought.find().select('-__v');
+            const thoughts = await Thought.find();
             res.json(thoughts);
-        }catch(err){res.status(500).json(err);}
+        }catch(err){
+            console.error(err);
+            res.status(500).json(err);}
     },
 
     async getSingleThought(req, res){
         try{
-            const thought = await Thought.findOne(req.params.thoughtId)
-            .select('-__v')
-            .populate({path:'reactions', select:'-__v'});
+            const thought = await Thought.findById(req.params.thoughtId)
+            .populate({path:'reactions'});
         }catch(err){res.status(500).json(err);}
     },
 
@@ -38,7 +39,15 @@ module.exports = {
     },
 
     async deleteThought(req,res){
-        try{}catch(err){res.status(500).json(err);}
+        try{
+            const thought = await Thought.findByIdAndDelete(req.params.thoughtId);
+            if(!thought){
+                return res.status(404).json({message: "No thought with that id."});
+            }
+
+            res.json({message: 'Thought successfully removed!'});
+
+        }catch(err){res.status(500).json(err);}
     }
 
 
